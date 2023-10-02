@@ -2,8 +2,8 @@ import { toNano, beginCell } from "ton";
 import { Blockchain, SandboxContract, TreasuryContract } from "@ton-community/sandbox";
 import "@ton-community/test-utils";
 
-import { NftCollection } from "./output/sample_NftCollection";
-import { NftItem } from "./output/sample_NftItem";
+import { NftCollection } from "../wrappers/NftCollection";
+import { NftItem } from "../wrappers/NftItem";
 
 describe("contract", () => {
     const OFFCHAIN_CONTENT_PREFIX = 0x01;
