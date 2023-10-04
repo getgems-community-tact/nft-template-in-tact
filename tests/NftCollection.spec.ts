@@ -2,10 +2,9 @@ import { toNano, beginCell } from "ton";
 import { Blockchain, SandboxContract, TreasuryContract } from "@ton-community/sandbox";
 import "@ton-community/test-utils";
 
-import { NftCollection } from "./output/sample_NftCollection";
-import { NftItem } from "./output/sample_NftItem";
+import { NftCollection } from "../wrappers/NftCollection";
 
-describe("contract", () => {
+describe("nftCollection", () => {
     const OFFCHAIN_CONTENT_PREFIX = 0x01;
     const string_first = "https://s.getgems.io/nft-staging/c/628f6ab8077060a7a8d52d63/";
     let newContent = beginCell().storeInt(OFFCHAIN_CONTENT_PREFIX, 8).storeStringRefTail(string_first).endCell();
@@ -42,13 +41,20 @@ describe("contract", () => {
     });
 
     it("should deploy correctly", async () => {
-        const deploy_result = await collection.send(deployer.getSender(), { value: toNano(1) }, "Mint"); // Send Mint Transaction
+        const deploy_result = await collection.send(deployer.getSender(),
+            {
+                value: toNano(1)
+            }, "Mint"); // Send Mint Transaction
+        
         expect(deploy_result.transactions).toHaveTransaction({
             from: deployer.address,
             to: collection.address,
             success: true,
         });
 
-        console.log("Next IndexID: " + (await collection.getGetCollectionData()).next_item_index);
+        // Check getters
+        expect((await collection.getRoyaltyParams()).numerator).toEqual(350n);
+
+        console.log("next_item_index: " + (await collection.getGetCollectionData()).next_item_index);
     });
 });
