@@ -1,6 +1,11 @@
-import "./nft_item";
+import "./structs";
+import "./messages";
+import "./../nft_item/nft_item";
 
 contract NftCollection {
+    
+    const minTonsForStorage: Int = ton("0.03");
+    const gasConsumption: Int = ton("0.03"); // gas consuption for different operations may differ, so it's better to separate such consts
 
     next_item_index: Int as uint32 = 0;
     owner_address: Address;
@@ -13,13 +18,14 @@ contract NftCollection {
         self.royalty_params = royalty_params;
     }
 
+    // [Collection Contract] -> Transfer -> OwnershipAssigned -> NFTExcesses
     receive("Mint"){
         let ctx: Context = context(); // get sender Info
 
         let msgValue: Int = ctx.value;
         let tonBalanceBeforeMsg: Int = myBalance() - msgValue;
-        let storageFee: Int = minTonsForStorage - min(tonBalanceBeforeMsg, minTonsForStorage);
-        msgValue = msgValue - (storageFee + gasConsumption);
+        let storageFee: Int = self.minTonsForStorage - min(tonBalanceBeforeMsg, self.minTonsForStorage);
+        msgValue = msgValue - (storageFee + self.gasConsumption);
 
         self.mint(ctx.sender, msgValue);
     }
@@ -96,27 +102,4 @@ contract NftCollection {
     get fun royalty_params(): RoyaltyParams {
         return self.royalty_params;
     }
-}
-
-message(0x693d3950) GetRoyaltyParams {
-    query_id: Int as uint64;
-}
-
-message(0xa8cb00ad) ReportRoyaltyParams {
-    query_id: Int as uint64;
-    numerator:  Int as uint16;
-    denominator: Int as uint16;
-    destination: Address;
-}
-
-struct CollectionData {
-    next_item_index: Int;
-    collection_content: Cell;
-    owner_address: Address;
-}
-
-struct RoyaltyParams {
-    numerator: Int;
-    denominator: Int;
-    destination: Address;
 }

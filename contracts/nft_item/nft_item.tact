@@ -1,7 +1,11 @@
-const minTonsForStorage: Int = ton("0.03");
-const gasConsumption: Int = ton("0.03");
+import "./structs";
+import "./messages";
 
 contract NftItem {
+
+    const minTonsForStorage: Int = ton("0.03");
+    const gasConsumption: Int = ton("0.03");
+    
     collection_address: Address;
     item_index: Int; 
     owner: Address;
@@ -21,8 +25,8 @@ contract NftItem {
     
         let msgValue: Int = ctx.value; // Check the gasCost for storage
         let tonBalanceBeforeMsg: Int = myBalance() - msgValue;
-        let storageFee: Int = minTonsForStorage - min(tonBalanceBeforeMsg, minTonsForStorage);
-        msgValue = msgValue - (storageFee + gasConsumption);
+        let storageFee: Int = self.minTonsForStorage - min(tonBalanceBeforeMsg, self.minTonsForStorage);
+        msgValue = msgValue - (storageFee + self.gasConsumption);
 
         // Only Owner of the this NFT Item can transfer it.
         require(ctx.sender == self.owner, "not owner");
@@ -95,41 +99,4 @@ contract NftItem {
         };
     }
 }
-// ---------------------------------------------------------------------------------------------------- //
-// [Collection Contract] -> Transfer -> OwnershipAssigned -> NFTExcesses
-message(0x5fcc3d14) Transfer { 
-    query_id: Int as uint64;            
-    new_owner: Address; 
-    response_destination: Address; 
-    custom_payload: Cell?; 
-    forward_amount: Int as coins; 
-    forward_payload: Slice as remaining; 
-}
 
-message(0x05138d91) OwnershipAssigned{
-    query_id: Int as uint64;
-    prev_owner: Address;
-    forward_payload: Slice as remaining; 
-}
-
-message(0xd53276db) Excesses {
-    query_id: Int as uint64;
-}
-
-message(0x2fcb26a2) GetStaticData { 
-    query_id: Int as uint64;
-}
-
-message(0x8b771735) ReportStaticData{
-    query_id: Int as uint64;
-    index_id: Int;
-    collection: Address;
-}
-
-struct GetNftData { 
-    is_initialized: Bool;
-    index: Int;
-    collection_address: Address; 
-    owner_address: Address;
-    individual_content: Cell;
-}
